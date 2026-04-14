@@ -4,6 +4,7 @@ import layout_zcyc
 import layout_trnscrb
 import layout_reader
 import layout_news
+import callback_zcyc
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 server = app.server
@@ -11,7 +12,6 @@ server = app.server
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     
-    # Верхнее меню
     html.Div([
         html.Div([
             html.A("Кривая доходности", href="/zcyc", className="custom-menu-button"),
@@ -21,15 +21,12 @@ app.layout = html.Div([
         ], className="custom-menu-container")
     ], className="custom-menu-wrapper"),
     
-    # Область для отображения выбранной страницы
     html.Div(id='page-content', className="custom-page-content"),
     
-    # JavaScript для подсветки активной кнопки
     html.Script('''
         function setActiveButton() {
             const currentPath = window.location.pathname;
             const buttons = document.querySelectorAll('.custom-menu-button');
-            
             buttons.forEach(button => {
                 button.classList.remove('custom-menu-button-active');
                 const href = button.getAttribute('href');
@@ -38,9 +35,7 @@ app.layout = html.Div([
                 }
             });
         }
-        
         setTimeout(setActiveButton, 100);
-        
         let lastUrl = window.location.href;
         setInterval(function() {
             if (window.location.href !== lastUrl) {
