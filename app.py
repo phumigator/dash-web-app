@@ -6,29 +6,49 @@ import layout_reader
 import layout_news
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
-server = app.server  # для gunicorn
+server = app.server
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    # Верхнее меню с минимальной высотой
+    
+    # Верхнее меню
     html.Div([
         html.Div([
-            dcc.Link("Кривая доходности", href="/zcyc", className="menu-button"),
-            dcc.Link("Транскрибация", href="/trnscrb", className="menu-button"),
-            dcc.Link("Распознавание", href="/reader", className="menu-button"),
-            dcc.Link("Новости", href="/news", className="menu-button"),
-        ], style={
-            'display': 'flex',
-            'gap': '20px',
-            'padding': '10px 20px',
-            'fontFamily': 'Franklin Gothic Book',
-            'fontSize': '14pt',
-            'background': '#f0f0f0',
-            'borderBottom': '1px solid #ccc'
-        })
-    ], style={'minHeight': 'min-content'}),
+            html.A("Кривая доходности", href="/zcyc", className="custom-menu-button"),
+            html.A("Транскрибация", href="/trnscrb", className="custom-menu-button"),
+            html.A("Распознавание", href="/reader", className="custom-menu-button"),
+            html.A("Новости", href="/news", className="custom-menu-button"),
+        ], className="custom-menu-container")
+    ], className="custom-menu-wrapper"),
+    
     # Область для отображения выбранной страницы
-    html.Div(id='page-content', style={'padding': '20px'})
+    html.Div(id='page-content', className="custom-page-content"),
+    
+    # JavaScript для подсветки активной кнопки
+    html.Script('''
+        function setActiveButton() {
+            const currentPath = window.location.pathname;
+            const buttons = document.querySelectorAll('.custom-menu-button');
+            
+            buttons.forEach(button => {
+                button.classList.remove('custom-menu-button-active');
+                const href = button.getAttribute('href');
+                if (href === currentPath || (currentPath === '/' && href === '/zcyc')) {
+                    button.classList.add('custom-menu-button-active');
+                }
+            });
+        }
+        
+        setTimeout(setActiveButton, 100);
+        
+        let lastUrl = window.location.href;
+        setInterval(function() {
+            if (window.location.href !== lastUrl) {
+                lastUrl = window.location.href;
+                setTimeout(setActiveButton, 100);
+            }
+        }, 100);
+    ''')
 ])
 
 @app.callback(Output('page-content', 'children'), Input('url', 'pathname'))
@@ -42,7 +62,6 @@ def display_page(pathname):
     elif pathname == '/news':
         return layout_news.layout()
     else:
-        # По умолчанию (включая '/') показываем страницу "Кривая доходности"
         return layout_zcyc.layout()
 
 if __name__ == '__main__':
